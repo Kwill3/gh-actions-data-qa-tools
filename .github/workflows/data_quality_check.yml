@@ -29,6 +29,5 @@ jobs:
         run: |
           echo "List of .csv files checked for duplicates: ${{ steps.changed-csv-files.outputs.all_changed_files }}"
 
-
       - name: Run python checkfile
         run: python dupe_key_check.py ${{ steps.changed-csv-files.outputs.all_changed_files }}
