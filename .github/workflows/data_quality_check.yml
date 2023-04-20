@@ -8,6 +8,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
@@ -24,10 +29,6 @@ jobs:
         run: |
           echo "List of .csv files checked for duplicates: ${{ steps.changed-csv-files.outputs.all_changed_files }}"
 
-      - name: Set up Python 3.x
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
 
       - name: Run python checkfile
-        run: py dupe_key_check.py ${{ steps.changed-csv-files.outputs.all_changed_files }}
+        run: python dupe_key_check.py ${{ steps.changed-csv-files.outputs.all_changed_files }}
