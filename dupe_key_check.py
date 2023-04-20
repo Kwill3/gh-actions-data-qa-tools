@@ -21,7 +21,7 @@ for file in csv_files:
 
     with open(CSV_PATH, 'r', encoding='utf-8') as csv_in:
         csv_reader = csv.DictReader(csv_in, delimiter=',')
-        line_count = 0
+        line_count = 1
         for row in csv_reader:
             # Check if key exists
             key_value = row[KEY_COLUMN_NAME]
@@ -41,7 +41,7 @@ for file in csv_files:
                         'line': []
                     }
                 })
-        line_count += 1
+            line_count += 1
 
         # Creates a list of only duplicates with their indices
         for key, value in key_check.items():
