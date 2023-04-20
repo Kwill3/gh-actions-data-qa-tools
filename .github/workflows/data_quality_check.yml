@@ -1,6 +1,6 @@
 name: data_quality_check
 on:
-  push:
+  pull_request:
     paths:
       - '**.csv'
 jobs:
@@ -16,7 +16,7 @@ jobs:
         id: changed-csv-files
         uses: tj-actions/changed-files@v35
         with:
-          files:
+          files: |
             **/*.csv
         
       - name: Run step if .csv files are checked
