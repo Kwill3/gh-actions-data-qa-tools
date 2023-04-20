@@ -7,7 +7,6 @@
 import csv
 import sys
 
-csv_file_amount = len(sys.argv) - 1
 csv_files = sys.argv[1:]
 for file in csv_files:
     # Input settings
@@ -69,4 +68,7 @@ for file in csv_files:
 
         print('[', file, ']')
         print('Number of duplicates found:', dupe_count)
+
+    if dupe_count > 0:
         print('List of duplicated keys and their index:', dupe_list)
+        sys.exit("Program terminated: Duplicates found in dataset.")
