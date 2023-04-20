@@ -1,0 +1,10 @@
+key_id,value,startv,endv
+US,United States,1,2
+FR,France,2,
+US,United States,2,
+FR,France,2,5
+IT,Italy,1,3
+IT,Italy,1,
+SG,Singapore,1,5
+SG,Singapore,1,
+IT,Italy,2,7
