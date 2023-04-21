@@ -1,6 +1,5 @@
 """
-    Description: Checks for duplicate key and start-end pairs
-
+    Description: Checks for version overlap of keys in csv files
     Author: William Lee
 
 """
