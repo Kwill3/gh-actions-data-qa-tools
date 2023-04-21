@@ -7,6 +7,8 @@
 import csv
 import sys
 
+check_failed_flag = False
+failed_files = []
 csv_files = sys.argv[1:]
 for file in csv_files:
     # Input settings
@@ -16,8 +18,8 @@ for file in csv_files:
     END_COLUMN_NAME = 'endv'
 
     key_check = {}
-    dupe_count = 0
-    dupe_list = {}
+    overlap_count = 0
+    overlap_list = {}
 
     with open(CSV_PATH, 'r', encoding='utf-8') as csv_in:
         csv_reader = csv.DictReader(csv_in, delimiter=',')
@@ -31,7 +33,7 @@ for file in csv_files:
                 # Check if same start and end exists and is a duplicate
                 if [start_value, end_value] in key_check[key_value]['start_end']:
                     key_check[key_value]['line'].append(line_count)
-                    dupe_count += 1
+                    overlap_count += 1
                 else:
                     key_check[key_value]['start_end'].append([start_value, end_value])
             else:
@@ -46,19 +48,26 @@ for file in csv_files:
         # Creates a list of only duplicates with their indices
         for key, value in key_check.items():
             if value['line']:
-                if dupe_list.get(key):
-                    append_index = dupe_list[key].append(value['line'])
-                    dupe_list.update({
+                if overlap_list.get(key):
+                    append_index = overlap_list[key].append(value['line'])
+                    overlap_list.update({
                         key: append_index
                     })
                 else:
-                    dupe_list.update({
+                    overlap_list.update({
                         key: value['line']
                     })
 
         print('[', file, ']')
-        print('Number of duplicates found:', dupe_count)
+        print('Number of version overlaps found:', overlap_count)
 
-    if dupe_count > 0:
-        print('List of duplicated keys and their index:', dupe_list)
-        sys.exit("Program terminated: Duplicates found in dataset.")
+    if overlap_count > 0:
+        print('List of overlapping versions for keys and their index:', overlap_list)
+        check_failed_flag = True
+        failed_files.append(file)
+
+if check_failed_flag:
+    print(f"Run ended. Version overlap found in dataset(s): {failed_files}")
+    sys.exit("Checks failed.")
+else:
+    print("Run ended. No overlaps found: Checks passed.")
