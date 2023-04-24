@@ -24,47 +24,110 @@ for file in csv_files:
         csv_reader = csv.DictReader(csv_in, delimiter=',')
         line_count = 1
         for row in csv_reader:
-            # Check if key exists
             key_value = row[KEY_COLUMN_NAME]
             start_value = row[START_COLUMN_NAME]
             end_value = row[END_COLUMN_NAME]
+            # Check if key exists
             if key_value in key_check:
-                # Check if same start and end exists and is a duplicate
-                if [start_value, end_value] in key_check[key_value]['start_end']:
-                    key_check[key_value]['line'].append(line_count)
-                    overlap_count += 1
+                # Current version case
+                if (end_value == '' or end_value == '-'):
+                    # Has existing current version that clashes with new current version
+                    if key_check[key_value]['has_current_version']:
+                        # Add old current version to tracker
+                        if overlap_list.get(key_value):
+                            overlap_list[key_value].update({
+                                key_check[key_value]['current_version_line']: [start_value, '-']
+                            })
+                        else:
+                            overlap_list.update({
+                                key_value: {
+                                    key_check[key_value]['current_version_line']: [start_value, '-']
+                                }
+                            })
+                        # Add new current version to tracker and checked list
+                        overlap_list[key_value].update({
+                            line_count: [start_value, '-']
+                        })
+                        key_check[key_value]['lines'].update({
+                            line_count: [start_value, '-']
+                        })
+                    # Set record as existing current version
+                    else:
+                        key_check[key_value].update({
+                            'has_current_version': True,
+                            'current_version_line': line_count
+                        })
+                        # Check if current version overlaps with an existing key
+                        for k, v in key_check[key_value]['lines'].items():
+                            if start_value < v[1]:
+                                # Add current version to tracker
+                                if overlap_list.get(key_value):
+                                    overlap_list[key_value].update({
+                                        line_count: [start_value, end_value]
+                                    })
+                                else:
+                                    overlap_list.update({
+                                        key_value: {
+                                            line_count: [start_value, end_value]
+                                        }
+                                    })
+                                # Add existing key to tracker
+                                overlap_list[key_value].update({
+                                    k: v
+                                })
                 else:
-                    key_check[key_value]['start_end'].append([start_value, end_value])
+                    for k, v in key_check[key_value]['lines'].items():
+                        # Check if record is within previous version ranges
+                        if not ((start_value < v[0] and end_value <= v[0]) or (start_value >= v[1] and end_value > v[1]) or (end_value <= v[0] and v[1] == '-')):
+                            # Add record to tracker
+                            if overlap_list.get(key_value):
+                                overlap_list[key_value].update({
+                                    line_count: [start_value, end_value]
+                                })
+                            else:
+                                overlap_list.update({
+                                    key_value: {
+                                        line_count: [start_value, end_value]
+                                    }
+                                })
+                    # Add record to checked list
+                    key_check[key_value]['lines'].update({
+                        line_count: [start_value, end_value]
+                    })
             else:
-                key_check.update({
-                    key_value: {
-                        'start_end': [[start_value, end_value]],
-                        'line': []
-                    }
-                })
+                # First current version case
+                if (end_value == '' or end_value == '-'):
+                    key_check.update({
+                        key_value: {
+                            # TODO: Change end value to consistent format
+                            'lines': {line_count: [start_value, '-']},
+                            'has_current_version': True,
+                            'current_version_line': line_count
+                        }
+                    })
+                else:
+                    key_check.update({
+                        key_value: {
+                            'lines': {line_count: [start_value, end_value]},
+                            'has_current_version': False,
+                            'current_version_line': None
+                        }
+                    })
             line_count += 1
 
-        # Creates a list of only duplicates with their indices
-        for key, value in key_check.items():
-            if value['line']:
-                if overlap_list.get(key):
-                    append_index = overlap_list[key].append(value['line'])
-                    overlap_list.update({
-                        key: append_index
-                    })
-                else:
-                    overlap_list.update({
-                        key: value['line']
-                    })
-
         print('[', file, ']')
+        for key in overlap_list:
+            for entry in key:
+                overlap_count += 1
         print('Number of version overlaps found:', overlap_count)
 
+    # Check for overlaps in this file
     if overlap_count > 0:
         print('List of overlapping versions for keys and their index:', overlap_list)
         check_failed_flag = True
         failed_files.append(file)
 
+# Prints run status for file(s)
 if check_failed_flag:
     print(f"Run ended. Version overlap found in dataset(s): {failed_files}")
     sys.exit("Checks failed.")
