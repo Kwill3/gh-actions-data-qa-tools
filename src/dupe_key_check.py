@@ -7,17 +7,14 @@
 import csv
 import sys
 
-csv_files = sys.argv[1:]
-for file in csv_files:
-    # Input settings
-    CSV_PATH = f'{file}'
+def scan_file(filename:str, dupe_list)->int:
+    CSV_PATH = filename
     KEY_COLUMN_NAME = 'key_id'
     START_COLUMN_NAME = 'startv'
     END_COLUMN_NAME = 'endv'
 
     key_check = {}
     dupe_count = 0
-    dupe_list = {}
 
     with open(CSV_PATH, 'r', encoding='utf-8') as csv_in:
         csv_reader = csv.DictReader(csv_in, delimiter=',')
@@ -56,9 +53,18 @@ for file in csv_files:
                         key: value['line']
                     })
 
-        print('[', file, ']')
+        print(f'[{filename}]')
         print('Number of duplicates found:', dupe_count)
+    return dupe_count
 
-    if dupe_count > 0:
-        print('List of duplicated keys and their index:', dupe_list)
-        sys.exit("Program terminated: Duplicates found in dataset.")
+dupe_count = 0
+dupe_list = {}
+
+csv_files = sys.argv[1:]
+for file in csv_files:
+    # Input settings
+    dupe_count += scan_file(file, dupe_list)
+
+if dupe_count > 0:
+    print('List of duplicated keys and their index:', dupe_list)
+    sys.exit("Program terminated: Duplicates found in dataset.")
