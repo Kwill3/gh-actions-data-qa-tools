@@ -8,10 +8,9 @@ import sys
 
 check_failed_flag = False
 failed_files = []
-csv_files = sys.argv[1:]
-for file in csv_files:
+def scan_file(filename:str, overlap_list)->int:
     # Input settings
-    CSV_PATH = f'{file}'
+    CSV_PATH = filename
     KEY_COLUMN_NAME = 'key_id'
     START_COLUMN_NAME = 'startv'
     END_COLUMN_NAME = 'endv'
@@ -30,26 +29,26 @@ for file in csv_files:
             # Check if key exists
             if key_value in key_check:
                 # Current version case
-                if (end_value == '' or end_value == '-'):
+                if end_value == '':
                     # Has existing current version that clashes with new current version
                     if key_check[key_value]['has_current_version']:
                         # Add old current version to tracker
                         if overlap_list.get(key_value):
                             overlap_list[key_value].update({
-                                key_check[key_value]['current_version_line']: [start_value, '-']
+                                key_check[key_value]['current_version_line']: [start_value, '']
                             })
                         else:
                             overlap_list.update({
                                 key_value: {
-                                    key_check[key_value]['current_version_line']: [start_value, '-']
+                                    key_check[key_value]['current_version_line']: [start_value, '']
                                 }
                             })
                         # Add new current version to tracker and checked list
                         overlap_list[key_value].update({
-                            line_count: [start_value, '-']
+                            line_count: [start_value, '']
                         })
                         key_check[key_value]['lines'].update({
-                            line_count: [start_value, '-']
+                            line_count: [start_value, '']
                         })
                     # Set record as existing current version
                     else:
@@ -78,7 +77,7 @@ for file in csv_files:
                 else:
                     for k, v in key_check[key_value]['lines'].items():
                         # Check if record is within previous version ranges
-                        if not ((start_value < v[0] and end_value <= v[0]) or (start_value >= v[1] and end_value > v[1]) or (end_value <= v[0] and v[1] == '-')):
+                        if not ((start_value < v[0] and end_value <= v[0]) or (start_value >= v[1] and end_value > v[1]) or (end_value <= v[0] and v[1] == '')):
                             # Add record to tracker
                             if overlap_list.get(key_value):
                                 overlap_list[key_value].update({
@@ -96,11 +95,11 @@ for file in csv_files:
                     })
             else:
                 # First current version case
-                if (end_value == '' or end_value == '-'):
+                if end_value == '':
                     key_check.update({
                         key_value: {
                             # TODO: Change end value to consistent format
-                            'lines': {line_count: [start_value, '-']},
+                            'lines': {line_count: [start_value, '']},
                             'has_current_version': True,
                             'current_version_line': line_count
                         }
@@ -115,7 +114,7 @@ for file in csv_files:
                     })
             line_count += 1
 
-        print('[', file, ']')
+        print(f'[{filename}]')
         for key in overlap_list:
             for entry in key:
                 overlap_count += 1
@@ -125,7 +124,9 @@ for file in csv_files:
     if overlap_count > 0:
         print('List of overlapping versions for keys and their index:', overlap_list)
         check_failed_flag = True
-        failed_files.append(file)
+        failed_files.append(filename)
+
+    return overlap_count
 
 # Prints run status for file(s)
 if check_failed_flag:
