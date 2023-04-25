@@ -89,6 +89,10 @@ def scan_file(filename:str, overlap_list)->int:
                                         line_count: [start_value, end_value]
                                     }
                                 })
+                            # Add existing key to tracker
+                            overlap_list[key_value].update({
+                                k: v
+                            })
                     # Add record to checked list
                     key_check[key_value]['lines'].update({
                         line_count: [start_value, end_value]
