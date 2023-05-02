@@ -1,0 +1,31 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+exclude: '^.*\.ipynb$'
+default_language_version:
+    python: python3.10
+repos:
+- repo: https://github.com/sirosen/texthooks
+  rev: 0.5.0
+  hooks:
+    - id: fix-smartquotes
+      # replace default single quote chars with this set:
+      # apostrophe, fullwidth apostrophe, left single quote, single high
+      # reversed-9 quote, right single quote
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+    -   id: trailing-whitespace
+    -   id: end-of-file-fixer
+    -   id: check-yaml
+    -   id: check-added-large-files
+    -   id: check-json
+    -   id: pretty-format-json
+        args: [--autofix, --indent=4, --no-sort-keys]
+    -   id: detect-aws-credentials
+    -   id: detect-private-key
+-   repo: https://github.com/charliermarsh/ruff-pre-commit
+    # Ruff version.
+    rev: 'v0.0.261'
+    hooks:
+    - id: ruff
+      args: [--fix, --exit-non-zero-on-fix]

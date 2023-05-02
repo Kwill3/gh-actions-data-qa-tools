@@ -23,7 +23,7 @@ jobs:
         with:
           files: |
             **/*.csv
-        
+
       - name: Run step if .csv files are checked
         if: steps.changed-csv-files.outputs.any_changed == 'true'
         run: |
